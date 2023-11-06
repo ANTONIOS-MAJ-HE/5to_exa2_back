@@ -1,0 +1,68 @@
+<!-- En tu archivo contactos_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Lista de Contactos{% endblock %}
+
+{% block content %}
+<h1>Lista de Contactos</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="contactos-list">
+        <!-- Aquí se mostrarán los datos de la API -->
+    </tbody>
+</table>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/api/contactos/',  // URL de la API que deseas consumir
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Recorre los datos y agrégalos a la tabla
+                data.forEach(function (contacto) {
+                    $('#contactos-list').append('<tr><td>' + contacto.nombre + '</td><td>' + contacto.apellido + '</td><td>' + contacto.telefono + '</td><td>' + contacto.email + '</td><td><a href="#" class="eliminar-contacto" data-contacto-id="' + contacto.id + '">Eliminar</a></td></tr>');
+                });
+            },
+            error: function () {
+                console.log('Error al obtener los datos de la API');
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Agrega un manejador de clic para los enlaces de eliminación
+        $('#contactos-list').on('click', '.eliminar-contacto', function (event) {
+            event.preventDefault();
+            var contactoId = $(this).data('contacto-id');
+            if (confirm('¿Estás seguro de que deseas eliminar este contacto?')) {
+                eliminarContacto(contactoId);
+            }
+        });
+    });
+
+    function eliminarContacto(contactoId) {
+        $.ajax({
+            url: '/api/contactos/' + contactoId + '/',
+            type: 'DELETE',
+            dataType: 'json',
+            success: function (data) {
+                // Eliminar la fila de la tabla
+                $('#contactos-list tr[data-contacto-id="' + contactoId + '"]').remove();
+            },
+            error: function () {
+                console.log('Error al eliminar el contacto');
+            }
+        });
+    }
+</script>
+{% endblock %}
